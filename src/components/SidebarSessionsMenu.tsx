@@ -1,12 +1,12 @@
 import { useActiveSession } from "../contexts/ActiveSessionContext";
 
+const sessions = [
+  { id: 1, title: "Chat #1" },
+  { id: 2, title: "Chat #2" },
+];
+
 const SidebarSessionsMenu = () => {
   const { setActiveSession } = useActiveSession();
-
-  const sessions = [
-    { id: 1, title: "Chat #1" },
-    { id: 2, title: "Chat #2" },
-  ];
 
   return (
     <div className="p-2">

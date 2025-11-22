@@ -1,17 +1,21 @@
 // import { Plus } from "lucide-react";
 
-const sidebarMenuItems = [
-  {
-    title: "New Chat",
-    // icon: <Plus size={18} />,
-    icon: "+ ",
-    action: () => {
-      alert("Working!");
-    },
-  },
-];
+import { useActiveSession } from "../contexts/ActiveSessionContext";
 
 const SidebarActionsMenu = () => {
+  const { setActiveSession } = useActiveSession();
+
+  const sidebarMenuItems = [
+    {
+      title: "New Chat",
+      // icon: <Plus size={18} />,
+      icon: "+ ",
+      action: () => {
+        setActiveSession(3);
+      },
+    },
+  ];
+
   return (
     <div className="px-1">
       <ul>
