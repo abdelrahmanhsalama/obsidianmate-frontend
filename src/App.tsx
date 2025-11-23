@@ -1,12 +1,21 @@
 import "./App.css";
 import Sidebar from "./components/Sidebar";
 import Conversation from "./components/Conversation";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
+import Welcome from "./components/Welcome";
 
 function App() {
+  const { isAuthenticated } = useKindeAuth();
   return (
-    <div className="min-h-screen dark:text-gray-100 grid grid-cols-[1fr_4fr]">
-      <Sidebar />
-      <Conversation />
+    <div className="min-h-screen dark:bg-gray-900 dark:text-gray-100">
+      {isAuthenticated ? (
+        <div className="grid grid-cols-[1fr_4fr]">
+          <Sidebar />
+          <Conversation />
+        </div>
+      ) : (
+        <Welcome />
+      )}
     </div>
   );
 }
