@@ -1,13 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useActiveSession } from "../contexts/ActiveSessionContext";
 import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 import { Trash } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-const sessions = [
-  { id: 1, title: "Chat #1" },
-  { id: 2, title: "Chat #2" },
-];
 
 const SidebarSessionsMenu = () => {
   const { activeSession, setActiveSession } = useActiveSession();
@@ -39,7 +34,7 @@ const SidebarSessionsMenu = () => {
 
   const deleteSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      const res = await fetch(
+      await fetch(
         `${
           import.meta.env.VITE_BASE_URL
         }/api/v1/data/delete_session/${sessionId}/${user?.id}`,
