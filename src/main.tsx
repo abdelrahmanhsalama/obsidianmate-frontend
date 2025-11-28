@@ -4,6 +4,9 @@ import "./index.css";
 import App from "./App.tsx";
 import { ActiveSessionProvider } from "./contexts/ActiveSessionContext";
 import { KindeProvider } from "@kinde-oss/kinde-auth-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -13,9 +16,11 @@ createRoot(document.getElementById("root")!).render(
       redirectUri="http://localhost:5173"
       logoutUri="http://localhost:5173"
     >
-      <ActiveSessionProvider>
-        <App />
-      </ActiveSessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <ActiveSessionProvider>
+          <App />
+        </ActiveSessionProvider>
+      </QueryClientProvider>
     </KindeProvider>
   </StrictMode>
 );

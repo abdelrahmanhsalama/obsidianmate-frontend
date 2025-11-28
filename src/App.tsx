@@ -7,9 +7,9 @@ import Welcome from "./components/Welcome";
 function App() {
   const { isAuthenticated } = useKindeAuth();
   return (
-    <div className="min-h-screen dark:bg-gray-900 dark:text-gray-100">
+    <div className="dark:bg-gray-900 dark:text-gray-100">
       {isAuthenticated ? (
-        <div className="grid grid-cols-[1fr_4fr]">
+        <div className="grid grid-cols-[1fr_4fr] h-screen">
           <Sidebar />
           <Conversation />
         </div>

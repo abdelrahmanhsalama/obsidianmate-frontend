@@ -1,16 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
 
-type Session = null | number;
-
-type ActiveSession = {
-  activeSession: Session;
-  setActiveSession: React.Dispatch<React.SetStateAction<Session>>;
-};
-
-const ActiveSessionContext = createContext<ActiveSession | null>(null);
+const ActiveSessionContext = createContext<{
+  activeSession: string | null;
+  setActiveSession: React.Dispatch<React.SetStateAction<string | null>>;
+} | null>(null);
 
 const ActiveSessionProvider = ({ children }: { children: React.ReactNode }) => {
-  const [activeSession, setActiveSession] = useState<Session>(null);
+  const [activeSession, setActiveSession] = useState<string | null>(null);
   return (
     <ActiveSessionContext.Provider value={{ activeSession, setActiveSession }}>
       {children}
