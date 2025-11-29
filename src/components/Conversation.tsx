@@ -45,6 +45,7 @@ const Conversation = () => {
   const [sendingError, setSendingError] = useState(false);
 
   const lastMessageRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToLastMessage = () => {
     lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,6 +54,15 @@ const Conversation = () => {
   useEffect(() => {
     scrollToLastMessage();
   }, [session?.chat_history, botResponding, sendingError]);
+
+  useEffect(() => {
+    if (!botResponding) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [botResponding]);
 
   const sendMessageMutation = useMutation({
     mutationFn: async (messageText: string) => {
@@ -66,7 +76,7 @@ const Conversation = () => {
       const response = await fetch(apiLink, {
         method: "POST",
         headers: {
-          Accept: "application/json", // Make sure we're expecting JSON back
+          Accept: "application/json",
         },
       });
 
@@ -106,6 +116,62 @@ const Conversation = () => {
     sendMessageMutation.mutate(message);
   };
 
+  const summarize = useMutation({
+    mutationFn: async () => {
+      let query = "Summarize:";
+      session.chat_history.forEach((chat: Message) => {
+        query = query.concat("\n\n", chat.author, ": \n\n", chat.text);
+      });
+      const encodedQuery = encodeURIComponent(query);
+      const apiLink = `${
+        import.meta.env.VITE_BASE_URL
+      }/api/v1/nlp/chat/${activeSession}/${user?.id}?query=${encodedQuery}`;
+
+      console.log("API Request:", apiLink);
+
+      const response = await fetch(apiLink, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        console.error("API Error:", error);
+        throw new Error(error.detail || "Failed to send message");
+      }
+
+      return await response.json();
+    },
+    onMutate: () => {
+      setNewMessage("");
+      setSendingError(false);
+      setBotResponding(true);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["session", activeSession],
+      });
+      setMessageBeingSent("");
+      setSendingError(false);
+      setBotResponding(false);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
+    },
+    onError: (error) => {
+      console.log(error);
+      setMessageBeingSent("");
+      setNewMessage(messageBeingSent);
+      setSendingError(true);
+      setBotResponding(false);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
+    },
+  });
+
   return (
     <main className="dark:bg-gray-950">
       {(!session || isLoading || sessionError) && (
@@ -135,7 +201,7 @@ const Conversation = () => {
                   message.author === "user" ? "justify-end" : "justify-start"
                 } p-2`}
               >
-                <p className="bg-gray-800 p-2 rounded-sm whitespace-pre-line">
+                <p className="bg-gray-800 p-2 rounded-sm whitespace-pre-line max-w-[80%]">
                   {message.text}
                 </p>
               </div>
@@ -170,15 +236,21 @@ const Conversation = () => {
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage(newMessage)}
               disabled={botResponding}
+              ref={inputRef}
             ></input>
             <button
-              className={`bg-gray-800 px-2 py-2.5 rounded-sm cursor-pointer hover:bg-gray-600 ${
-                botResponding ? "cursor-not-allowed" : ""
-              }`}
+              className="bg-gray-800 px-2 py-2.5 rounded-sm cursor-pointer hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-900"
               onClick={() => sendMessage(newMessage)}
               disabled={botResponding}
             >
               Send
+            </button>
+            <button
+              className="bg-gray-800 px-2 py-2.5 rounded-sm cursor-pointer hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-900"
+              onClick={() => summarize.mutate()}
+              disabled={botResponding || session.chat_history.length < 4}
+            >
+              Summarize
             </button>
           </div>
         </div>
